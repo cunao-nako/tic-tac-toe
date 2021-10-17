@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-export class App extends Component {
+export class TicTacToeApp extends Component {
   render() {
     return (
         <>
