@@ -3,30 +3,76 @@ import React, {Component} from 'react';
 class ManagedForm extends Component {
   constructor(props) {
     super(props);
-    this.state = {value: ''};
-    this.nameInputChangeHandler = this.nameInputChangeHandler.bind(this);
-    this.formSubmitHandler = this.formSubmitHandler.bind(this);
+    this.state = {
+      nameValue: '',
+      messageValue: '',
+      selectDefaultValue: 'coconut',
+      addToShoppingCart: false,
+      selectOptions: [
+        {value: 'coconut', title: 'Кокос'},
+        {value: 'apple', title: 'Яблоко'},
+        {value: 'mango', title: 'Манго'},
+        {value: 'orange', title: 'Апельсин'},
+        {value: 'lemon', title: 'Лимон'},
+      ],
+    };
+    this.inputChangeHandler = this.inputChangeHandler.bind(this);
+    this.messageFormSubmitHandler = this.messageFormSubmitHandler.bind(this);
+    this.selectChangeHandler = this.selectChangeHandler.bind(this);
+    this.checkboxChangeHandler = this.checkboxChangeHandler.bind(this);
   }
 
-  nameInputChangeHandler(event) {
-    this.setState({value: event.target.value})
+  inputChangeHandler(event) {
+    const name = event.target.name;
+    const value = event.target.value;
+    this.setState({[name]: value})
   }
 
-  formSubmitHandler(event) {
+  messageFormSubmitHandler(event) {
     event.preventDefault();
-    alert(this.state.value);
-    this.setState({value: ''});
+    const senderName = this.state.nameValue ? `${this.state.nameValue}:` : '';
+    const senderMessage = this.state.messageValue;
+    const senderNameAndMessage = senderName || senderMessage ? `${senderName} ${senderMessage}`.trim() : '';
+    const shoppingCart = `${this.state.addToShoppingCart ? `| ${this.state.selectDefaultValue}` : ''}`;
+    alert(`${senderNameAndMessage} ${shoppingCart}`.trim());
+    this.setState({nameValue: '', messageValue: '', addToShoppingCart: false});
+  }
+
+  selectChangeHandler(event) {
+    this.setState({selectDefaultValue: event.target.value});
+  }
+
+  checkboxChangeHandler() {
+    this.setState((state) => ({addToShoppingCart: !state.addToShoppingCart}));
+  }
+
+  get selectOptions() {
+    return this.state.selectOptions.map((option) => <option value={option.value}>{option.title}</option>);
   }
 
   render() {
+    const {nameValue, messageValue, selectDefaultValue, addToShoppingCart} = this.state;
     return(
-        <form onSubmit={this.formSubmitHandler}>
+        <>
+          <select value={selectDefaultValue} onChange={this.selectChangeHandler}>
+            {this.selectOptions}
+          </select>
           <label>
-            Имя:
-            <input type="text" value={this.state.value} onChange={this.nameInputChangeHandler} />
+            Купить
+            <input type='checkbox' checked={addToShoppingCart} onChange={this.checkboxChangeHandler}/>
           </label>
-          <input type="submit" value="Отправить" />
-        </form>
+          <form onSubmit={this.messageFormSubmitHandler}>
+            <label>
+              Имя:
+              <input name='nameValue' type="text" value={nameValue} onChange={this.inputChangeHandler} />
+            </label>
+            <label>
+              Сообщение:
+              <textarea name='messageValue' value={messageValue} onChange={this.inputChangeHandler}/>
+            </label>
+            <input type='submit' value='Enter'/>
+          </form>
+        </>
     );
   }
 }
