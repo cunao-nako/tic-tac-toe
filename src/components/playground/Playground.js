@@ -12,16 +12,47 @@ function WaterBoilingResult(props) {
 
 }
 
+function convertToCelsius(temperature) {
+  return Math.round((temperature - 32) * 5 / 9);
+}
+
+function convertToFahrenheit(temperature) {
+  return Math.round((temperature * 9 / 5) + 32);
+}
+
+function convertTemperature({scale, temperature}) {
+  switch (scale) {
+    case 'celsius':
+      return convertToCelsius(temperature * 9 / 5);
+    default:
+      return convertToFahrenheit(temperature);
+  }
+
+}
+
 function TemperatureInputBlock(props) {
-  const {temperature, temperatureInputChangeHandler, scaleName} = props;
+  const {temperature, temperatureInputChangeHandler, scale} = props;
   const scaleNames = {
-    c: 'Цельсиях',
-    f: 'Фаренгейтах',
+    celsius: 'Цельсиях',
+    fahrenheit: 'Фаренгейтах',
   };
+
+  const preTemperatureInputChangeHandler = event => {
+    event.preventDefault();
+    const temperature = event.target.value;
+    const convertedCelsiusTemperature = convertTemperature({scale: 'celsius', temperature})
+    temperatureInputChangeHandler(convertedCelsiusTemperature);
+  }
+
+  const temperatureValueByScale = () => {
+    console.debug('converting');
+    return convertTemperature({scale, temperature});
+  }
+
   return (
       <>
-        <legend>Введите температуру в {scaleNames[scaleName]}:</legend>
-        <input value={temperature} onChange={temperatureInputChangeHandler}/>
+        <legend>Введите температуру в {scaleNames[scale]}:</legend>
+        <input value={temperatureValueByScale()} onChange={preTemperatureInputChangeHandler}/>
         <br/>
       </>
   );
@@ -30,13 +61,12 @@ function TemperatureInputBlock(props) {
 class Calculator extends Component {
   constructor(props) {
     super(props);
-    this.state = {temperature: ''};
+    this.state = {temperature: 0};
     this.temperatureInputChangeHandler = this.temperatureInputChangeHandler.bind(this);
   }
 
-  temperatureInputChangeHandler(event) {
-    const value = event.target.value;
-    this.setState({temperature: value});
+  temperatureInputChangeHandler(convertedCelsiusTemperature) {
+    this.setState({temperature: convertedCelsiusTemperature});
   }
 
   render() {
@@ -44,12 +74,12 @@ class Calculator extends Component {
     return(
         <>
           <TemperatureInputBlock
-              scaleName='c'
+              scale='celsius'
               temperature={temperature}
               temperatureInputChangeHandler={this.temperatureInputChangeHandler}
           />
           <TemperatureInputBlock
-              scaleName='f'
+              scale='fahrenheit'
               temperature={temperature}
               temperatureInputChangeHandler={this.temperatureInputChangeHandler}
           />
